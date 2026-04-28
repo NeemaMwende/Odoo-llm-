@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Session list view for debugging -->
+    <record id="copilot_session_view_list" model="ir.ui.view">
+        <field name="name">copilot.session.list</field>
+        <field name="model">copilot.session</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="user_id"/>
+                <field name="res_model"/>
+                <field name="res_id"/>
+                <field name="message_count"/>
+                <field name="write_date"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="copilot_session_view_form" model="ir.ui.view">
+        <field name="name">copilot.session.form</field>
+        <field name="model">copilot.session</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="user_id"/>
+                        <field name="res_model"/>
+                        <field name="res_id"/>
+                        <field name="res_name"/>
+                    </group>
+                    <notebook>
+                        <page string="Messages">
+                            <field name="message_ids">
+                                <list>
+                                    <field name="role"/>
+                                    <field name="content"/>
+                                    <field name="create_date"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Menu (only shown to admins / technical users) -->
+    <record id="action_copilot_sessions" model="ir.actions.act_window">
+        <field name="name">Copilot Sessions</field>
+        <field name="res_model">copilot.session</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_copilot_root"
+              name="Copilot"
+              sequence="99"
+              groups="base.group_system"/>
+    <menuitem id="menu_copilot_sessions"
+              name="Sessions"
+              parent="menu_copilot_root"
+              action="action_copilot_sessions"
+              groups="base.group_system"/>
+</odoo>
