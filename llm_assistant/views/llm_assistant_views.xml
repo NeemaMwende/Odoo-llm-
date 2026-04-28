@@ -1,0 +1,356 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!-- Tree View -->
+    <record id="view_llm_assistant_tree" model="ir.ui.view">
+        <field name="name">llm.assistant.tree</field>
+        <field name="model">llm.assistant</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name" />
+                <field name="code" />
+                <field name="res_model" />
+                <field name="category_id" />
+                <field name="provider_id" />
+                <field name="model_id" />
+                <field name="prompt_id" />
+                <field name="template_format" />
+                <field name="tag_ids" widget="many2many_tags" />
+                <field name="is_public" />
+                <field name="is_default" widget="boolean_toggle" />
+                <field name="thread_count" />
+                <field name="active" />
+            </list>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_llm_assistant_form" model="ir.ui.view">
+        <field name="name">llm.assistant.form</field>
+        <field name="model">llm.assistant</field>
+        <field name="arch" type="xml">
+            <form string="Assistant">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button
+              name="action_view_threads"
+              type="object"
+              class="oe_stat_button"
+              icon="fa-comments"
+            >
+                            <field
+                name="thread_count"
+                widget="statinfo"
+                string="Threads"
+              />
+                        </button>
+                        <button
+              name="action_view_prompt"
+              type="object"
+              class="oe_stat_button"
+              icon="fa-file-text-o"
+              invisible="not prompt_id"
+            >
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_value">
+                                    <field
+                    name="template_format"
+                    readonly="1"
+                  />
+                                </span>
+                                <span class="o_stat_text">Template</span>
+                            </div>
+                        </button>
+                        <button
+              name="toggle_active"
+              type="object"
+              class="oe_stat_button"
+              icon="fa-archive"
+            >
+                            <field name="active" widget="boolean_toggle" />
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only" />
+                        <h1><field
+                name="name"
+                placeholder="Assistant Name"
+              /></h1>
+                    </div>
+                    <group>
+                        <group name="configuration">
+                            <field
+                name="code"
+                placeholder="e.g., roleplay, avatar_generation"
+              />
+                            <field
+                name="res_model"
+                placeholder="e.g., fleek.character"
+              />
+                            <field name="provider_id" />
+                            <field name="model_id" />
+                            <field
+                name="prompt_id"
+                options="{'no_create': False, 'no_open': False}"
+              />
+                            <field name="category_id" readonly="1" />
+                            <field
+                name="tag_ids"
+                widget="many2many_tags"
+                readonly="1"
+              />
+                        </group>
+                        <group name="access_control">
+                            <field name="is_public" />
+                            <field name="is_default" />
+                            <field
+                name="allowed_group_ids"
+                widget="many2many_tags"
+                invisible="is_public"
+                options="{'no_create': True}"
+              />
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Configuration" name="configuration">
+                            <group>
+                                <field
+                  name="default_values"
+                  widget="json_editor"
+                />
+                                <field
+                  name="has_dynamic_defaults"
+                  help="Enable if your default values contain template expressions that should be evaluated"
+                />
+                            </group>
+
+                            <!-- Reset Defaults Button -->
+                            <div class="mt-2">
+                                <button
+                  name="action_reset_defaults"
+                  string="Reset Defaults"
+                  type="object"
+                  class="btn-secondary"
+                  invisible="not prompt_id"
+                  help="Reset default values from the prompt template's argument schema defaults"
+                />
+                            </div>
+
+                            <!-- Help Text -->
+                            <div
+                class="alert alert-info w-100 mt-3 mb-3"
+                role="alert"
+              >
+                                <p class="mb-2">
+                                    <strong
+                  >Default Values:</strong> Define default values for prompt variables in JSON format.
+                                    These will be used as inputs to the prompt template.
+                                </p>
+                                <p class="mb-2">
+                                    <strong
+                  >Dynamic Defaults:</strong> When enabled, you can use template syntax like
+                                    <code>{{ user.name }}</code> or <code
+                  >{{ related_record.get_field('name') }}</code> in your default values.
+                                </p>
+                                <p class="mb-0">
+                                    <strong
+                  >Reset Defaults:</strong> Click "Reset Defaults" to automatically populate this field
+                                    with default values from the selected prompt template's argument schema.
+                                </p>
+                            </div>
+                        </page>
+                        <page string="Tools" name="tools">
+                            <group>
+                                <field
+                  name="tool_ids"
+                  widget="many2many_tags"
+                  options="{'no_create': True}"
+                  placeholder="Select tools for this assistant..."
+                />
+                                <field
+                  name="tool_calls_max"
+                  help="Maximum number of consecutive tool calls allowed before breaking the loop to prevent infinite tool calling"
+                />
+                            </group>
+                            <div class="text-muted px-3 py-2">
+                                Select the tools this assistant may need. These tools will be auto selected when you assign this assistant on LLM Chat Thread.
+                                <br />
+                                <strong
+                >Max Tool Calls:</strong> Prevents infinite loops by limiting consecutive tool executions (default: 5).
+                            </div>
+                        </page>
+                        <page string="Template" name="template">
+                            <div
+                class="alert alert-info w-100 mb-3"
+                role="alert"
+              >
+                                <p class="mb-0">
+                                    <strong>Template Management:</strong>
+                                    The template is managed through the associated prompt record.
+                                    Format: <strong><field
+                      name="template_format"
+                      readonly="1"
+                      class="oe_inline"
+                    /></strong>
+                                </p>
+                            </div>
+                            <group>
+                                <field
+                  name="template"
+                  widget="ace"
+                  readonly="1"
+                  options="{'mode': 'text'}"
+                />
+                            </group>
+                            <div class="mt-3">
+                                <button
+                  name="action_view_prompt"
+                  type="object"
+                  string="Edit Template in Prompt"
+                  class="btn-primary"
+                  invisible="not prompt_id"
+                />
+                                <p class="text-muted mt-2">
+                                    <i class="fa fa-info-circle" />
+                                    The template is read-only here. Click the button above to edit it in the prompt record.
+                                </p>
+                            </div>
+                        </page>
+                        <page string="Preview" name="preview">
+                            <field
+                name="system_prompt_preview"
+                widget="ace"
+                options="{'mode': 'markdown'}"
+                readonly="1"
+              />
+                        </page>
+                        <page string="Related Threads" name="related_threads">
+                            <field name="thread_ids" readonly="1">
+                                <list>
+                                    <field name="name" />
+                                    <field name="user_id" />
+                                    <field name="write_date" />
+                                    <button
+                    name="action_open_thread"
+                    string="Open"
+                    type="object"
+                    class="btn btn-primary btn-sm"
+                  />
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter />
+            </form>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="view_llm_assistant_search" model="ir.ui.view">
+        <field name="name">llm.assistant.search</field>
+        <field name="model">llm.assistant</field>
+        <field name="arch" type="xml">
+            <search string="Search Assistants">
+                <field name="name" />
+                <field name="code" />
+                <field name="res_model" />
+                <field name="category_id" />
+                <field name="tag_ids" />
+                <field name="provider_id" />
+                <field name="model_id" />
+                <field name="prompt_id" />
+                <field name="allowed_group_ids" />
+                <separator />
+                <filter
+          string="Public"
+          name="public"
+          domain="[('is_public', '=', True)]"
+        />
+                <filter
+          string="Private"
+          name="private"
+          domain="[('is_public', '=', False)]"
+        />
+                <filter
+          string="Default"
+          name="default"
+          domain="[('is_default', '=', True)]"
+        />
+                <filter
+          string="Text Templates"
+          name="format_text"
+          domain="[('template_format', '=', 'text')]"
+        />
+                <filter
+          string="YAML Templates"
+          name="format_yaml"
+          domain="[('template_format', '=', 'yaml')]"
+        />
+                <filter
+          string="JSON Templates"
+          name="format_json"
+          domain="[('template_format', '=', 'json')]"
+        />
+                <filter
+          string="Archived"
+          name="inactive"
+          domain="[('active', '=', False)]"
+        />
+                <group expand="0" string="Group By">
+                    <filter
+            string="Category"
+            name="category"
+            domain="[]"
+            context="{'group_by': 'category_id'}"
+          />
+                    <filter
+            string="Provider"
+            name="provider"
+            domain="[]"
+            context="{'group_by': 'provider_id'}"
+          />
+                    <filter
+            string="Model"
+            name="model"
+            domain="[]"
+            context="{'group_by': 'model_id'}"
+          />
+                    <filter
+            string="Prompt Template"
+            name="prompt"
+            domain="[]"
+            context="{'group_by': 'prompt_id'}"
+          />
+                    <filter
+            string="Template Format"
+            name="template_format"
+            domain="[]"
+            context="{'group_by': 'template_format'}"
+          />
+                    <filter
+            string="Access Level"
+            name="access_level"
+            domain="[]"
+            context="{'group_by': 'is_public'}"
+          />
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_llm_assistant" model="ir.actions.act_window">
+        <field name="name">Assistants</field>
+        <field name="res_model">llm.assistant</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_llm_assistant_search" />
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first AI Assistant!
+            </p>
+            <p>
+                Assistants can be configured with specific roles, goals, and tools to enhance your AI interactions.
+            </p>
+        </field>
+    </record>
+</odoo>
