@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_copilot_session_user,copilot.session user,model_copilot_session,base.group_user,1,1,1,1
+access_copilot_message_user,copilot.message user,model_copilot_message,base.group_user,1,1,1,1
